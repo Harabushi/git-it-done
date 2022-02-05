@@ -1,4 +1,5 @@
 let issueContainerEl = document.querySelector("#issues-container");
+let limitWarningEl = document.querySelector("#limit-warning");
 
 function getRepoIssues (repo) {
   let apiUrl = "https://api.github.com/repos/" + repo + "/issues?direction=asc";
@@ -9,6 +10,11 @@ function getRepoIssues (repo) {
       response.json().then(function(data) {
         // pass response data to dom function
         displayIssues(data);
+
+        // check if api has paginated issues
+        if (response.headers.get("link")) {
+          displayWarning(repo)
+        }
       });
     }
     else {
@@ -52,4 +58,16 @@ function displayIssues (issues) {
     issueContainerEl.appendChild(issueEl);
   }
 }
-getRepoIssues("harabushi/taskmaster-pro");
+
+function displayWarning (repo) {
+  // add text to warning container
+  limitWarningEl.textContent = "This repo has more than 30 issues, ";
+  let linkEl = document.createElement("a");
+  linkEl.textContent = "See More Issues on Github.com";
+  linkEl.setAttribute("href", "https://github.com/" + repo + "/issues");
+  linkEl.setAttribute("target", "_blank");
+
+  // append to warning container
+  limitWarningEl.appendChild(linkEl);
+};
+getRepoIssues("facebook/react");
